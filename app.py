@@ -24,6 +24,7 @@ DATABASE = os.getenv("DATABASE")
 SCHEMA = os.getenv("SCHEMA")
 PASSWORD = os.getenv("PASSWORD")
 ANALYST_ENDPOINT = os.getenv("ANALYST_ENDPOINT")
+LLM_ENDPOINT = os.getenv("LLM_ENDPOINT")
 RSA_PRIVATE_KEY_PATH = os.getenv("RSA_PRIVATE_KEY_PATH")
 STAGE = os.getenv("SEMANTIC_MODEL_STAGE")
 FILE = os.getenv("SEMANTIC_MODEL_FILE")
@@ -56,6 +57,7 @@ def message_hello(message, say):
 @app.event("message")
 def handle_message_events(ack, body, say):
     ack()
+    print(body)
     prompt = body['event']['text']
     process_analyst_message(prompt, say, thread_ts=body['event']['ts'])
 
@@ -107,7 +109,9 @@ def say_question(prompt,say, thread_ts):
 
 def query_cortex_analyst(prompt) -> Dict[str, Any]:
     request_body = {
-        "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
+        "messages": [
+            {"role": "user", "content": [{"type": "text", "text": prompt}]}
+        ],
         # "semantic_model_file": f"@{DATABASE}.{SCHEMA}.{STAGE}/{FILE}",
         "semantic_model_file": f"@ALCHEMY_DEV.DEV_BLAKE.SEMANTIC_MODELS/{FILE}",
     }
@@ -298,29 +302,68 @@ def display_analyst_content(
                 thread_ts=thread_ts
             )               
 
+def query_llm_for_chart(df) -> Any:
+    # Convert DataFrame to a string representation for the API
+    df_str = df.head().to_string()
+
+    cortex_payload = {
+        "model": "llama3.1-8b",  # Replace with your actual model name
+        "messages": [
+            {"role": "system", "content": "You are a data visualization assistant."},
+            {"role": "user", "content": f"The following is a sample of a DataFrame:\n{df_str}\nBased on this data, determine the best chart type (line, bar, or pie, or none). Respond with one word specifying the type."}
+        ]
+    }
+
+    resp = requests.post(
+        url=f"{LLM_ENDPOINT}",
+        json=cortex_payload,
+        headers={
+            "X-Snowflake-Authorization-Token-Type": "KEYPAIR_JWT",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {JWT}",
+        },
+    )
+    if resp.status_code == 200:
+        return resp.text
+    else:
+        raise ValueError(f"Cortex API call failed: {resp.status_code} {resp.text}")
+
 def plot_chart(df):
     # Try to detect if the data represents a time series
     is_time_series = False
 
-    # Check if the index is datetime-like
-    if pd.api.types.is_datetime64_any_dtype(df.index):
-        is_time_series = True
+    response = query_llm_for_chart(df)
+    print(response)
+    chart_type = None
+    if "bar" in response.lower():
+        chart_type = "bar"
+    elif "pie" in response.lower():
+        chart_type = "pie"
+    elif "line" in response.lower():
+        chart_type = "line"
     else:
-        # Attempt to convert the first column to datetime
-        try:
-            df[df.columns[0]] = pd.to_datetime(df[df.columns[0]])
-            df.set_index(df.columns[0], inplace=True)
-            is_time_series = True
-        except (ValueError, TypeError):
-            pass
+        raise ValueError("Unsupported chart type")
 
-    # Determine the chart type
-    if is_time_series:
-        chart_type = 'line'
-    elif len(df.columns) == 2 and pd.api.types.is_numeric_dtype(df[df.columns[1]]):
-        chart_type = 'pie'
-    else:
-        raise ValueError("Unsupported DataFrame structure for plotting.")
+    # # Check if the index is datetime-like
+    # if pd.api.types.is_datetime64_any_dtype(df.index):
+    #     is_time_series = True
+    # else:
+    #     # Attempt to convert the first column to datetime
+    #     try:
+    #         df[df.columns[0]] = pd.to_datetime(df[df.columns[0]])
+    #         df.set_index(df.columns[0], inplace=True)
+    #         is_time_series = True
+    #     except (ValueError, TypeError):
+    #         pass
+
+    # # Determine the chart type
+    # if is_time_series:
+    #     chart_type = 'line'
+    # elif len(df.columns) == 2 and pd.api.types.is_numeric_dtype(df[df.columns[1]]):
+    #     chart_type = 'pie'
+    # else:
+    #     raise ValueError("Unsupported DataFrame structure for plotting.")
 
     plt.figure(figsize=(10, 6), facecolor='#333333')
 
@@ -334,6 +377,16 @@ def plot_chart(df):
         plt.legend(fontsize=12, loc='best')  # Add a legend for line chart
         plt.gca().set_facecolor('#333333')
         plt.grid(color='gray', linestyle='--', linewidth=0.5)
+
+    elif chart_type == 'bar':
+        # Bar chart
+        plt.bar(df.index, df[df.columns[0]], color=plt.cm.tab20.colors[0])
+        plt.xlabel(df.index.name or "Categories", fontsize=14, color="white")
+        plt.ylabel("Values", fontsize=14, color="white")
+        plt.title("Bar Chart", fontsize=16, color="white")
+        plt.xticks(rotation=45)
+        plt.gca().set_facecolor('#333333')
+        plt.grid(color='gray', linestyle='--', linewidth=0.5, axis='y')
 
     elif chart_type == 'pie':
         # Pie chart
