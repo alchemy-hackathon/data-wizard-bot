@@ -1,0 +1,1016 @@
+name: product_usage__daily
+tables:
+  - name: PRODUCT_USAGE__DAILY
+    description: This table tracks daily usage metrics for various products and services
+      across different teams, applications, and blockchain networks. It captures information
+      on request and response details, including status codes, error codes, and request
+      types, as well as metrics on successful RPC and VM calls. The table also includes
+      data on product areas, categories, and suites, as well as team and application
+      information, to provide a comprehensive view of product usage and adoption.__
+    base_table:
+      database: ALCHEMY
+      schema: PRODUCT_USAGE
+      table: PRODUCT_USAGE__DAILY
+    dimensions:
+      - name: BLOCKCHAIN
+        synonyms:
+          - CHAIN
+        description: Blockchain Type__
+        expr: BLOCKCHAIN
+        data_type: TEXT
+        sample_values:
+          - CHAIN_UNSPECIFIED
+          - DEGEN
+          - ABSTRACT
+          - RACE
+          - ZETACHAIN
+          - BNB
+          - XMTP
+          - ETH
+          - ASTAR
+          - POLYNOMIAL
+          - INK
+          - SETTLUS
+          - BASE
+          - SHAPE
+          - STARKNET
+          - MATIC
+          - MANTLE
+          - IOTA
+          - ANIME
+          - SONEIUM
+          - METABASED
+          - SOLANA
+          - GEIST
+          - WORLDCHAIN
+          - ZORA
+          - ARBNOVA
+          - BOB
+          - SPOTLIGHT
+          - SONIC
+          - MODE
+          - UNICHAIN
+          - CRO
+          - MOONBEAM
+          - FANTOM
+          - LUMIA
+          - FRAX
+          - CELO
+          - FLOW
+          - ARB
+      - name: BLOCKCHAIN_NETWORK
+        synonyms:
+          - '  '
+        description: Blockchain Network__
+        expr: BLOCKCHAIN_NETWORK
+        data_type: TEXT
+        sample_values:
+          - LINEA_MAINNET
+          - ROOTSTOCK_MAINNET
+          - POLYGONZKEVM_CARDONA
+          - SOLANA_DEVNET
+          - DEGEN_MAINNET
+          - ETH_MAINNET
+          - BNB_MAINNET
+          - ARB_GOERLI
+          - FANTOM_MAINNET
+          - OPBNB_TESTNET
+          - ETH_RINKEBY
+          - SONEIUM_MINATO
+          - SONIC_MAINNET
+          - ETH_GOERLI
+          - GEIST_MAINNET
+          - ZETACHAIN_TESTNET
+          - INK_MAINNET
+          - GNOSIS_MAINNET
+          - STARKNET_GOERLI
+          - CELO_MAINNET
+          - OPT_GOERLI
+          - CROSSFI_TESTNET
+          - APECHAIN_MAINNET
+          - SCROLL_MAINNET
+          - CRO_CROESEID
+          - ETH_ROPSTEN
+          - BOB_MAINNET
+          - ZORA_SEPOLIA
+          - UNICHAIN_MAINNET
+          - BNB_TESTNET
+          - CHAIN_UNSPECIFIED_KOVAN
+          - CHAIN_UNSPECIFIED_MAINNET
+          - ANIME_SEPOLIA
+          - LENS_SEPOLIA
+          - FANTOM_TESTNET
+          - CHAIN_UNSPECIFIED_GOERLI
+          - SHAPE_MAINNET
+          - OPT_KOVAN
+          - BLAST_SEPOLIA
+      - name: REQUEST_METHOD
+        synonyms:
+          - '  '
+        description: The REQUEST_METHOD column represents the HTTP request methods
+          used in the daily product usage, including various Ethereum and Starknet
+          API calls, as well as other blockchain-related requests.__
+        expr: REQUEST_METHOD
+        data_type: TEXT
+        sample_values:
+          - starknet_blockNumber
+          - eth_getFilterLogs
+          - eth_newPendingTransactionFilter
+          - getInflationRate
+          - personal_sign
+          - get_contracts_for_owner
+          - getStakeActivation
+          - GetBlockHeaderByHeight
+          - zkevm_isBlockConsolidated
+          - eth_getUserOperationByHash
+          - get_spam_contracts
+          - None
+          - eth_getCode
+          - starknet_getTransactionStatus
+          - bor_getCurrentValidators
+          - requestAirdrop
+          - ExecuteScriptAtLatestBlock
+          - eth_chainId
+          - prices/tokens/by-symbol
+          - eth_createAccessList
+          - evm_mine
+          - getBlockTime
+          - hardhat_metadata
+          - rundler_maxPriorityFeePerGas
+          - eth_estimateGas
+          - eth_uninstallFilter
+          - simulateTransaction
+          - subgraph_queries
+          - eth_getBlockReceipts
+          - getLeaderSchedule
+          - metamask_logWeb3ShimUsage
+          - eth_coinbase
+          - getFirstAvailableBlock
+          - alchemy_getAssetTransfers
+          - getBlockHeight
+          - starknet_specVersion
+          - getConfirmedSignaturesForAddress2
+          - debug_traceBlockByHash
+          - test
+      - name: REQUEST_ISO_COUNTRY
+        synonyms:
+          - '  '
+        description: International ISO Country Codes for Request Origin__
+        expr: REQUEST_ISO_COUNTRY
+        data_type: TEXT
+        sample_values:
+          - VN
+          - JO
+          - HR
+          - IM
+          - CW
+          - NG
+          - LU
+          - AI
+          - BA
+          - KN
+          - BB
+          - KY
+          - BZ
+          - TT
+          - AZ
+          - CI
+          - SE
+          - TZ
+          - BO
+          - BI
+          - FJ
+          - RE
+          - OM
+          - BG
+          - MQ
+          - GE
+          - BW
+          - MR
+          - MF
+          - SS
+          - CN
+          - VE
+          - AF
+          - RS
+          - ES
+          - BQ
+          - GA
+          - LS
+          - MU
+      - name: REQUEST_REGION
+        synonyms:
+          - '  '
+        description: Geographic region where the product usage request originated.__
+        expr: REQUEST_REGION
+        data_type: TEXT
+        sample_values:
+          - None
+          - Other
+          - Oceania
+          - South America
+          - Europe
+          - North America
+          - Asia
+      - name: IS_WEBSOCKET_REQUEST
+        synonyms:
+          - '  '
+        description: Indicates whether the product usage is related to a WebSocket
+          request.__
+        expr: IS_WEBSOCKET_REQUEST
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: IS_BROWSER_REQUEST
+        synonyms:
+          - '  '
+        description: Indicates whether a browser request was made for the product.__
+        expr: IS_BROWSER_REQUEST
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: IS_WALLET_REQUEST
+        synonyms:
+          - '  '
+        description: Indicates whether a wallet request was made for the product.__
+        expr: IS_WALLET_REQUEST
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: IS_ARCHIVAL_REQUEST
+        synonyms:
+          - '  '
+        description: Indicates whether the product usage record is an archival request.__
+        expr: IS_ARCHIVAL_REQUEST
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'True'
+          - 'False'
+      - name: IS_SDK_REQUEST
+        synonyms:
+          - '  '
+        description: Indicates whether the product usage is related to an SDK request.__
+        expr: IS_SDK_REQUEST
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: IS_AA_SDK_REQUEST
+        synonyms:
+          - '  '
+        description: Indicates whether the request was made using the AA SDK.__
+        expr: IS_AA_SDK_REQUEST
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: IS_SUCCESSFUL_RPC
+        synonyms:
+          - '  '
+        description: Indicates whether the daily product usage RPC call was successful.__
+        expr: IS_SUCCESSFUL_RPC
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: IS_SUCCESSFUL_VM
+        synonyms:
+          - '  '
+        description: Indicates whether the virtual machine (VM) usage was successful
+          or not.__
+        expr: IS_SUCCESSFUL_VM
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: TEAM_PLAN_TIER
+        synonyms:
+          - '  '
+        description: Team Plan Tier__
+        expr: TEAM_PLAN_TIER
+        data_type: TEXT
+        sample_values:
+          - FREE
+          - GROWTH
+          - ENTERPRISE
+          - OTHER
+          - SCALE
+          - PLAN_TIER_UNSPECIFIED
+      - name: PRODUCT_AREA
+        synonyms:
+          - '  '
+        description: Product Area__
+        expr: PRODUCT_AREA
+        data_type: TEXT
+        sample_values:
+          - MULTICHAIN
+          - SUBGRAPH
+          - WALLETSERVICES
+          - READS
+          - WRITES
+          - EVM
+      - name: PRODUCT_CATEGORY
+        synonyms:
+          - '  '
+        description: Product Category__
+        expr: PRODUCT_CATEGORY
+        data_type: TEXT
+        sample_values:
+          - PARITY
+          - SUBGRAPH
+          - BUNDLER
+          - TOKEN
+          - PAYMASTERAPI
+          - CORE
+          - NFT
+          - SIGNER
+          - TRANSACTION
+          - SIMULATION
+          - WEBHOOK
+          - DEBUG
+          - TRANSFER
+          - PRICES_API
+          - TRACE
+          - WEBSOCKET
+          - TRANSACTION_RECEIPT
+          - GAS_OPTIMIZED
+      - name: IS_ALCHEMY_ENHANCED
+        synonyms:
+          - '  '
+        description: Indicates whether the product usage is enhanced with Alchemy
+          features.__
+        expr: IS_ALCHEMY_ENHANCED
+        data_type: BOOLEAN
+        sample_values:
+          - 'False'
+          - 'True'
+      - name: _SURROGATE_KEY
+        synonyms:
+          - '  '
+        description: Unique surrogate key for each product usage record.__
+        expr: _SURROGATE_KEY
+        data_type: TEXT
+        sample_values:
+          - 08ddc5b58252725670ace0100ea97e70
+          - 8e87c73a54751468736f166894ed6aa7
+          - 73197074d1c749ffc38131cfc29a6f89
+          - cc45a6ff9b9f70dfb7c11b8bb4399f41
+          - 0c23c1445bde18c1b3cd44308102d0cf
+          - 39477223279792bb52e31484239bea02
+          - 2092c94dcfbb334cd32a987ea311f07c
+          - 706edf4a12ca209106d6005e7f8e44ed
+          - be9c18617a32894efd57bf66717df9e6
+          - b37e8e81e2b0b1666a9902cb8658277b
+          - a3d1ec96881b9a0bdc3ac643ec946df2
+          - 508269e10a8d9cb84329b99fa742a51c
+          - c73938808c7fd426c913f2dca9a13a44
+          - 567f777442c2c0bbbcfa402233c4ba12
+          - 5603966a608f16194456d614cb492daa
+          - c9b7797f2be4fa34d4005d55c060c233
+          - a1f5c906f8c7b413440ee77b6c4bfa97
+          - 95a249ebbb8526748d1598ea1feafbe8
+          - ebbd82ebe441dae740a86b09eeeb6138
+          - e30b3fe754217970492ad4b3feb57f5e
+          - f62ad6fc3027050106bb2c53da046667
+          - 2524853ef61f692c65d8491266bbdd63
+          - b98ab8d64b8447d3aea466673b5591e6
+          - 244c3d749c684d61547bbe76ddf969fd
+          - 3b2a0b38dac7c87a5ad69c8d2b9caaf9
+          - cfeb1cfefe0a5866898898150a10cb2d
+          - de1a914be9cf308c6de3805abb57f33e
+          - 1c15f55c094aa3f8aab41857ae898775
+          - 92250a4beecc389830687cd624ac44ea
+          - 06065e8d0748c3e307eac0b8b4e559e1
+          - 019c4667b0c8d44563318c33bc0f8d41
+          - f5489fd988f55034f995e86e697b7b63
+          - b4650f7195f88e9f883cd1f072ff0ed5
+          - 4c470f1c581727c4650b889ce8df3d66
+          - 3d6bbcba8969342512ca6e942b7de82a
+          - 98ae12880a545e996535260d899b0bd6
+          - 5fec44846f16c726f2d58abdfc91b0b5
+          - 0cac1effc6f05aadecfe1c4816c2a948
+          - 64cf5f5b764c300b7c650ef993d20ace
+      - name: WEBHOOK_TYPE
+        synonyms:
+          - '  '
+        description: Type of webhook event that triggered the usage.__
+        expr: WEBHOOK_TYPE
+        data_type: TEXT
+        sample_values:
+          - None
+          - NFT_METADATA_UPDATE
+          - GRAPHQL
+          - WEBHOOK_EVENT_UNSPECIFIED
+          - MINED_TRANSACTION
+          - GAS_PRICE
+          - ADDRESS_ACTIVITY
+          - NFT_ACTIVITY
+          - DROPPED_TRANSACTION
+      - name: SUBSCRIPTION_TYPE
+        synonyms:
+          - '  '
+        description: Subscription type of the product usage.__
+        expr: SUBSCRIPTION_TYPE
+        data_type: TEXT
+        sample_values:
+          - signatureSubscribe
+          - None
+          - newHeads
+          - logsSubscribe
+          - logs
+          - blockSubscribe
+          - alchemy_filteredNewFullPendingTransactions
+          - alchemy_newFullPendingTransactions
+          - newPendingTransactions
+          - slotSubscribe
+          - slotsUpdatesSubscribe
+          - alchemy_minedTransactions
+      - name: SUBGRAPH_BILLING_PLAN
+        synonyms:
+          - '  '
+        description: Billing plan for the subgraph.__
+        expr: SUBGRAPH_BILLING_PLAN
+        data_type: TEXT
+        sample_values:
+          - None
+          - AlchemyScale
+          - Enterprise
+          - AlchemyEnterprise
+          - EnterpriseTrial
+          - Business
+          - QuickNodeBasic
+          - AlchemyGrowth
+          - Starter
+          - UnlimitedForever
+          - AlchemyFree
+      - name: PRODUCT_SUITE
+        synonyms:
+          - '  '
+        description: 'Product Suite refers to the type of product or service used
+          by a customer, which can be categorized into four main types: Subgraph,
+          Webhook, API, and Websocket.__'
+        expr: PRODUCT_SUITE
+        data_type: TEXT
+        sample_values:
+          - SUBGRAPH
+          - WEBHOOK
+          - API
+          - WEBSOCKET
+      - name: PRODUCT_USE
+        synonyms:
+          - '  '
+        description: List of Ethereum and Starknet product usage functions.__
+        expr: PRODUCT_USE
+        data_type: TEXT
+        sample_values:
+          - get_contracts_for_owner
+          - get_floor_price
+          - getEpochInfo
+          - getConfirmedBlock
+          - eth_newPendingTransactionFilter
+          - getInflationRate
+          - hardhat_metadata
+          - getBlockTime
+          - rundler_maxPriorityFeePerGas
+          - starknet_specVersion
+          - debug_traceBlockByHash
+          - getConfirmedSignaturesForAddress2
+          - ExecuteScriptAtLatestBlock
+          - pm_getPaymasterData
+          - bor_getSnapshotProposerSequence
+          - eth_signTypedData
+          - GetBlockHeaderByHeight
+          - zkevm_isBlockConsolidated
+          - eth_maxPriorityFeePerGas
+          - invalidate_contract
+          - eth_goerli
+          - eth_getFilterLogs
+          - getBlockHeight
+          - alchemy_getAssetTransfers
+          - eth_supportedEntryPoints
+          - eth_private_key
+          - wallet_getEthereumChains
+          - requestAirdrop
+          - eth_getBlockTransactionCountByNumber
+          - wallet_getCapabilities
+          - eth_getCode
+          - starknet_getTransactionStatus
+          - starknet_getEvents
+          - getTokenSupply
+          - starknet_addDeployAccountTransaction
+          - pm_getPaymasterStubData
+          - eth_getUserOperationByHash
+          - get_spam_contracts
+          - eth_getBlockReceipts
+      - name: PRODUCT_VERTICAL
+        synonyms:
+          - '  '
+        description: Product Vertical refers to the category or type of product or
+          service offered by the company.__
+        expr: PRODUCT_VERTICAL
+        data_type: TEXT
+        sample_values:
+          - Wallet Services (Non 4337)
+          - Node Services
+          - Data Services
+          - Wallet Services
+      - name: TEAM_NAME
+        synonyms:
+          - '  '
+        description: List of team names associated with product usage.__
+        expr: TEAM_NAME
+        data_type: TEXT
+        sample_values:
+          - dydx
+          - yu
+          - Connext
+          - Meliodas
+          - PixelGG
+          - Iuliana's Team
+          - Everyday Sloths
+          - Perspective
+          - Blast's Team
+          - Spinamp
+          - Calvin's Personal
+          - BuildBear Team
+          - trade
+          - Tasal
+          - Masterpiece.so
+          - NEC
+          - deniz
+          - bitone
+          - Raju's Team
+          - Yannick's Team
+          - Marcus's Team
+          - Big's Team
+          - slayer's Team
+          - Gheorghe's Team
+          - Snapshot
+          - Nectar
+          - DexWin
+          - Tayyaba's Team
+          - lil nouns dao
+          - Gijif's Team
+          - 二大爷's Team
+          - CYBAVO Inc
+          - Rohidas's Team
+          - iptrade
+          - NFProject
+          - 0x's Team
+          - Apurv's Team
+          - A-Team
+          - Zero Code NFT
+      - name: APP_NAME
+        synonyms:
+          - '  '
+        description: List of application names used in daily product usage.__
+        expr: APP_NAME
+        data_type: TEXT
+        sample_values:
+          - Test
+          - Arbitreum
+          - Hackathon Team's App
+          - loadbalancing
+          - polygon-pro
+          - eth-goerli-testnet-frontend
+          - SuperRare - Sepolia
+          - umami-web-mainnet
+          - tatin-optimism
+          - John's App
+          - Joseph
+          - Umee ETH
+          - (OLD FRONTEND)
+          - Ylide Ethereum
+          - Aura NFT Exchange
+          - Civic devnet
+          - mainnet-test
+          - Mirror Labs (Optimism)
+          - transaction monitoring rpc
+          - eth-goerli-backend-alchemy-3
+          - Base Mainnet
+          - None
+          - MyTest
+          - uTrading
+          - clnode
+          - Web Frontend
+          - mev
+          - rosnodemonitorring
+          - Arbitrum Production
+          - mifen-polygon
+          - road to web3 03
+          - Brian's First App
+          - argus ethereum
+          - Lidiya's Team's App
+          - forta-52
+          - '[front] logger'
+          - precrime-testnet-mumbai
+          - yavyn-devnode
+          - portal-mainnet
+      - name: LFG_FLAG
+        synonyms:
+          - '  '
+        description: Flag indicating whether the product is used for Light Financial
+          Guidance (LFG) or not.__
+        expr: LFG_FLAG
+        data_type: BOOLEAN
+        sample_values:
+          - None
+          - 'False'
+          - 'True'
+      - name: GENERALIZED_USE_CASE
+        synonyms:
+          - '  '
+        description: Generalized use case of the product, such as its primary function
+          or application.__
+        expr: GENERALIZED_USE_CASE
+        data_type: TEXT
+        sample_values:
+          - None
+          - Other
+          - NFT
+          - Wallet
+          - Gaming
+          - DeFi
+          - Infrastructure & Developer Tooling
+    time_dimensions:
+      - name: DT
+        synonyms:
+          - '  '
+        description: Date of Transaction__
+        expr: DT
+        data_type: DATE
+        sample_values:
+          - '2023-01-23'
+          - '2023-04-07'
+          - '2022-04-09'
+          - '2024-10-30'
+          - '2023-08-06'
+          - '2021-11-12'
+          - '2024-12-26'
+          - '2023-01-07'
+          - '2024-09-14'
+          - '2019-11-07'
+          - '2024-03-05'
+          - '2024-04-08'
+          - '2024-06-16'
+          - '2025-01-08'
+          - '2023-09-27'
+          - '2020-09-15'
+          - '2023-03-28'
+          - '2021-09-19'
+          - '2021-09-10'
+          - '2021-09-06'
+          - '2022-01-10'
+          - '2021-10-11'
+          - '2021-12-28'
+          - '2024-02-10'
+          - '2023-02-02'
+          - '2024-09-21'
+          - '2022-12-07'
+          - '2024-07-07'
+          - '2024-06-02'
+          - '2022-08-02'
+          - '2020-04-06'
+          - '2023-12-29'
+          - '2024-01-25'
+          - '2023-02-12'
+          - '2023-08-14'
+          - '2024-06-08'
+          - '2022-11-01'
+          - '2024-04-11'
+          - '2024-04-02'
+    measures:
+      - name: TEAM_ID
+        synonyms:
+          - '  '
+        description: Unique identifier for each team using the product.__
+        expr: TEAM_ID
+        data_type: NUMBER
+        sample_values:
+          - '764838'
+          - '157004'
+          - '463722'
+          - '214848'
+          - '1892914'
+          - '278492'
+          - '388858'
+          - '818564'
+          - '131002'
+          - '1821570'
+          - '2774486'
+          - '5687'
+          - '5792982'
+          - '78304'
+          - '184520'
+          - '20361'
+          - '29765'
+          - '331600'
+          - '664616'
+          - '4047404'
+          - '336140'
+          - '419332'
+          - '384504'
+          - '760590'
+          - '2006628'
+          - '2800682'
+          - '3920848'
+          - '151706'
+          - '25153'
+          - '269556'
+          - '376316'
+          - '222198'
+          - '119734'
+          - '1610616'
+          - '335328'
+          - '4641808'
+          - '2668118'
+          - '3199048'
+          - '38253'
+      - name: APP_ID
+        synonyms:
+          - '  '
+        description: Unique identifier for each product application.__
+        expr: APP_ID
+        data_type: NUMBER
+        sample_values:
+          - '7940234'
+          - '3229526'
+          - '3088986'
+          - '3741018'
+          - '4214472'
+          - '926998'
+          - '6497132'
+          - '10477200'
+          - '5680458'
+          - '7768474'
+          - '2732124'
+          - '5825314'
+          - '5964100'
+          - '10121146'
+          - '1976428'
+          - '13754'
+          - '10354030'
+          - '1446562'
+          - '3697224'
+          - '6671718'
+          - '638082'
+          - '1384816'
+          - '10808598'
+          - '665720'
+          - '4176328'
+          - '10872474'
+          - '1499640'
+          - '7220924'
+          - '7888438'
+          - '9749716'
+          - '6324400'
+          - '7529608'
+          - '118086'
+          - '936844'
+          - '7900966'
+          - '7373602'
+          - '7545772'
+          - '1881446'
+          - '3331564'
+      - name: RESPONSE_STATUS_CODE
+        synonyms:
+          - '  '
+        description: 'Response Status Code: The unique identifier assigned to each
+          response status, indicating the outcome of a product usage event.__'
+        expr: RESPONSE_STATUS_CODE
+        data_type: NUMBER
+        sample_values:
+          - '546'
+          - '414'
+          - '507'
+          - '301'
+          - '2'
+          - None
+          - '540'
+          - '422'
+          - '201'
+          - '560'
+          - '498'
+          - '304'
+          - '530'
+          - '425'
+          - '564'
+          - '4'
+          - '3'
+          - '406'
+          - '405'
+          - '409'
+          - '13'
+          - '526'
+          - '570'
+          - '424'
+          - '11'
+          - '420'
+          - '200'
+          - '521'
+          - '531'
+          - '800'
+          - '8'
+          - '415'
+          - '418'
+          - '523'
+          - '16'
+          - '524'
+          - '503'
+          - '463'
+          - '525'
+      - name: RESPONSE_ERROR_CODE
+        synonyms:
+          - '  '
+        description: Error codes for response errors in product usage.__
+        expr: RESPONSE_ERROR_CODE
+        data_type: NUMBER
+        sample_values:
+          - None
+          - '-33000'
+          - '9'
+          - '11'
+          - '-32015'
+          - '-32508'
+          - '-32001'
+          - '52'
+          - '32'
+          - '41'
+          - '-32006'
+          - '-32000'
+          - '402'
+          - '33'
+          - '-39001'
+          - '-32501'
+          - '-32010'
+          - '31'
+          - '-32502'
+          - '-32505'
+          - '-32500'
+          - '50'
+          - '53'
+          - '-32091'
+          - '1'
+          - '429'
+          - '-32002'
+          - '54'
+          - '-32012'
+          - '-32017'
+          - '56'
+          - '-32007'
+          - '25'
+          - '-32507'
+          - '-32090'
+          - '-32003'
+          - '5'
+          - '3'
+          - '-32008'
+      - name: TOTAL_COUNT
+        synonyms:
+          - '  '
+        description: Total daily count of product usage.__
+        expr: TOTAL_COUNT
+        data_type: NUMBER
+        sample_values:
+          - '41'
+          - '5150'
+          - '1617'
+          - '917'
+          - '4578'
+          - '5763'
+          - '7205'
+          - '2135'
+          - '19787'
+          - '86370'
+          - '1720'
+          - '2366'
+          - '22947'
+          - '356'
+          - '4628'
+          - '29492'
+          - '4436'
+          - '29103'
+          - '24153'
+          - '1605'
+          - '28547'
+          - '278765'
+          - '24772'
+          - '535'
+          - '41664'
+          - '76821'
+          - '17549'
+          - '21422'
+          - '3991'
+          - '102467'
+          - '1067'
+          - '145687'
+          - '34502'
+          - '2646'
+          - '11143'
+          - '1924'
+          - '2936'
+          - '5764'
+          - '195217'
+      - name: TOTAL_FCU
+        synonyms:
+          - '  '
+        description: Total number of FCU (Functional Currency Units) used daily.__
+        expr: TOTAL_FCU
+        data_type: NUMBER
+        sample_values:
+          - '1924'
+          - '118016'
+          - '16704'
+          - '14820'
+          - '635250'
+          - '731'
+          - '10564'
+          - '3998'
+          - '4095'
+          - '4100'
+          - '22464'
+          - '1612'
+          - '14060'
+          - '19890'
+          - '1720'
+          - '257565'
+          - '14212'
+          - '12458'
+          - '134130'
+          - '424800'
+          - '53100'
+          - '36000'
+          - '54190'
+          - '969'
+          - '1297800'
+          - '9728'
+          - '18126'
+          - '5616'
+          - '60736'
+          - '3410'
+          - '13208'
+          - '7134'
+          - '125472'
+          - '1767'
+          - '15200'
+          - '1244576'
+          - '48594'
+          - '111168'
+          - '30144'
+      - name: SNAPSHOT_COUNT
+        synonyms:
+          - '  '
+        description: Snapshot count of daily product usage.__
+        expr: SNAPSHOT_COUNT
+        data_type: NUMBER
+        sample_values:
+          - '209726'
+          - '762402'
+          - '4505'
+          - '2907393'
+          - '178192'
+          - '16200274'
+          - '6734'
+          - '43'
+          - '1927'
+          - '44152'
+          - '1459892'
+          - '8089641'
+          - '297'
+          - '272'
+          - '3747809'
+          - '1790'
+          - '90'
+          - '11483'
+          - '622143'
+          - '13144279'
+          - '2583914'
+          - '62069'
+          - '171062958'
+          - '38054'
+          - '60312'
+          - '487'
+          - '1670'
+          - '158'
+          - '948069'
+          - '780820'
+          - '39484'
+          - '57449'
+          - '18655'
+          - '2270'
+          - '1881'
+          - '51607573'
+          - '12763326'
+          - '186712'
+          - '4309145'

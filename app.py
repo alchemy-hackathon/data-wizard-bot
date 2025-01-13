@@ -17,8 +17,9 @@ import time
 matplotlib.use('Agg')
 load_dotenv()
 
-USER = os.getenv("USER")
+USER = os.getenv("USERNAME")
 ACCOUNT = os.getenv("ACCOUNT")
+WAREHOUSE = os.getenv("WAREHOUSE")
 DATABASE = os.getenv("DATABASE")
 SCHEMA = os.getenv("SCHEMA")
 PASSWORD = os.getenv("PASSWORD")
@@ -28,7 +29,7 @@ STAGE = os.getenv("SEMANTIC_MODEL_STAGE")
 FILE = os.getenv("SEMANTIC_MODEL_FILE")
 SLACK_APP_TOKEN = os.getenv("SLACK_APP_TOKEN")
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
-ENABLE_CHARTS = False
+ENABLE_CHARTS = True
 DEBUG = False
 
 # Initializes app
@@ -37,7 +38,7 @@ messages = []
 
 @app.message("hello")
 def message_hello(message, say):
-    say(f"Hey there <@{message['user']}>!")
+    say(f"Hey there <@{message['user']}>!", thread_ts=message['ts'])
     say(
         text = "Let's BUILD",
         blocks = [
@@ -48,28 +49,29 @@ def message_hello(message, say):
                     "text": f":snowflake: Let's BUILD!",
                 }
             },
-        ]                
+        ],
+        thread_ts=message['ts']
     )
 
 @app.event("message")
 def handle_message_events(ack, body, say):
     ack()
     prompt = body['event']['text']
-    process_analyst_message(prompt, say)
+    process_analyst_message(prompt, say, thread_ts=body['event']['ts'])
 
 @app.command("/asksnowflake")
 def ask_cortex(ack, body, say):
     ack()
     prompt = body['text']
-    process_analyst_message(prompt, say)
+    process_analyst_message(prompt, say, thread_ts=body['event']['ts'])
 
-def process_analyst_message(prompt, say) -> Any:
-    say_question(prompt, say)
+def process_analyst_message(prompt, say, thread_ts) -> Any:
+    say_question(prompt, say, thread_ts)
     response = query_cortex_analyst(prompt)
     content = response["message"]["content"]
-    display_analyst_content(content, say)
+    display_analyst_content(content, say, thread_ts)
 
-def say_question(prompt,say):
+def say_question(prompt,say, thread_ts):
     say(
         text = "Question:",
         blocks = [
@@ -77,10 +79,11 @@ def say_question(prompt,say):
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"Question: {prompt}",
+                    "text": f"Question: {prompt}\nIf a date is provided, put it in the first column",
                 }
             },
-        ]                
+        ],
+        thread_ts=thread_ts
     )
     say(
         text = "Snowflake Cortex Analyst is generating a response",
@@ -98,13 +101,15 @@ def say_question(prompt,say):
             {
                 "type": "divider"
             },
-        ]
+        ],
+        thread_ts=thread_ts
     )
 
 def query_cortex_analyst(prompt) -> Dict[str, Any]:
     request_body = {
         "messages": [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
-        "semantic_model_file": f"@{DATABASE}.{SCHEMA}.{STAGE}/{FILE}",
+        # "semantic_model_file": f"@{DATABASE}.{SCHEMA}.{STAGE}/{FILE}",
+        "semantic_model_file": f"@ALCHEMY_DEV.DEV_BLAKE.SEMANTIC_MODELS/{FILE}",
     }
     if DEBUG:
         print(request_body)
@@ -130,7 +135,8 @@ def query_cortex_analyst(prompt) -> Dict[str, Any]:
 
 def display_analyst_content(
     content: List[Dict[str, str]],
-    say=None
+    say=None,
+    thread_ts=None
 ) -> None:
     if DEBUG:
         print(content)
@@ -153,40 +159,80 @@ def display_analyst_content(
                             }
                         ]
                     }
-                ]
+                ],
+                thread_ts=thread_ts
             )
             df = pd.read_sql(item["statement"], CONN)
-            say(
-                text = "Answer:",
-                blocks=[
-                    {
-                        "type": "rich_text",
-                        "elements": [
+            # Check if DataFrame size exceeds 50KB
+            df_size = df.memory_usage(deep=True).sum()
+            if df_size > 50 * 1024:  # 50KB in bytes
+                # Split into chunks of 50 rows each
+                chunks = [df[i:i+50] for i in range(0, len(df), 50)]
+                for i, chunk in enumerate(chunks, 1):
+                    say(
+                        text = f"Answer (Part {i}/{len(chunks)}):",
+                        blocks=[
                             {
-                                "type": "rich_text_quote",
+                                "type": "rich_text",
                                 "elements": [
                                     {
-                                        "type": "text",
-                                        "text": "Answer:",
-                                        "style": {
-								            "bold": True
-							            }
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "rich_text_preformatted",
-                                "elements": [
+                                        "type": "rich_text_quote",
+                                        "elements": [
+                                            {
+                                                "type": "text",
+                                                "text": f"Answer (Part {i}/{len(chunks)}):",
+                                                "style": {
+                                                    "bold": True
+                                                }
+                                            }
+                                        ]
+                                    },
                                     {
-                                        "type": "text",
-                                        "text": f"{df.to_string()}"
+                                        "type": "rich_text_preformatted",
+                                        "elements": [
+                                            {
+                                                "type": "text",
+                                                "text": f"{chunk.to_string()}"
+                                            }
+                                        ]
                                     }
                                 ]
                             }
                         ]
-                    }
-                ]
-            )
+                    )
+            else:
+                say(
+                    text = "Answer:",
+                    blocks=[
+                        {
+                            "type": "rich_text",
+                            "elements": [
+                                {
+                                    "type": "rich_text_quote",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": "Answer:",
+                                            "style": {
+                                                "bold": True
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "rich_text_preformatted",
+                                    "elements": [
+                                        {
+                                            "type": "text",
+                                            "text": f"{df.to_string()}"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    thread_ts=thread_ts
+                )                    
             if ENABLE_CHARTS and len(df.columns) > 1:
                 chart_img_url = plot_chart(df)
                 if chart_img_url is not None:
@@ -205,7 +251,8 @@ def display_analyst_content(
                                 },
                                 "alt_text": "Chart"
                             }
-                        ]
+                        ],
+                        thread_ts=thread_ts
                     )
         elif item["type"] == "text":
             say(
@@ -225,7 +272,8 @@ def display_analyst_content(
                             }
                         ]
                     }
-                ]
+                ],
+                thread_ts=thread_ts
             )
         elif item["type"] == "suggestions":
             suggestions = "You may try these suggested questions: \n\n- " + "\n- ".join(item['suggestions']) + "\n\nNOTE: There's a 150 char limit on Slack messages so alter the questions accordingly."
@@ -246,47 +294,87 @@ def display_analyst_content(
                             }
                         ]
                     }
-                ]
+                ],
+                thread_ts=thread_ts
             )               
 
 def plot_chart(df):
+    # Try to detect if the data represents a time series
+    is_time_series = False
+
+    # Check if the index is datetime-like
+    if pd.api.types.is_datetime64_any_dtype(df.index):
+        is_time_series = True
+    else:
+        # Attempt to convert the first column to datetime
+        try:
+            df[df.columns[0]] = pd.to_datetime(df[df.columns[0]])
+            df.set_index(df.columns[0], inplace=True)
+            is_time_series = True
+        except (ValueError, TypeError):
+            pass
+
+    # Determine the chart type
+    if is_time_series:
+        chart_type = 'line'
+    elif len(df.columns) == 2 and pd.api.types.is_numeric_dtype(df[df.columns[1]]):
+        chart_type = 'pie'
+    else:
+        raise ValueError("Unsupported DataFrame structure for plotting.")
+
     plt.figure(figsize=(10, 6), facecolor='#333333')
 
-    # plot pie chart with percentages, using dynamic column names
-    plt.pie(df[df.columns[1]], 
-            labels=df[df.columns[0]], 
-            autopct='%1.1f%%', 
-            startangle=90, 
-            colors=['#1f77b4', '#ff7f0e'], 
-            textprops={'color':"white",'fontsize': 16})
+    if chart_type == 'line':
+        # Line chart
+        for col in df.columns:
+            plt.plot(df.index, df[col], label=col)
+        plt.xlabel("Time", fontsize=14, color="white")
+        plt.ylabel("Values", fontsize=14, color="white")
+        plt.title("Time Series Line Chart", fontsize=16, color="white")
+        plt.legend(fontsize=12, loc='best')  # Add a legend for line chart
+        plt.gca().set_facecolor('#333333')
+        plt.grid(color='gray', linestyle='--', linewidth=0.5)
 
-    # ensure equal aspect ratio
-    plt.axis('equal')
-    # set the background color for the plot area to dark as well
-    plt.gca().set_facecolor('#333333')   
+    elif chart_type == 'pie':
+        # Pie chart
+        wedges, texts, autotexts = plt.pie(df[df.columns[1]], 
+                                        # labels=df[df.columns[0]], 
+                                        autopct='%1.1f%%', 
+                                        startangle=90, 
+                                        colors=plt.cm.tab20.colors[:len(df)], 
+                                        textprops={'color': "white", 'fontsize': 16})
+        plt.axis('equal')  # Equal aspect ratio for pie chart
+        plt.gca().set_facecolor('#333333')
+
+        # Add a legend for the pie chart
+        plt.legend(wedges, df[df.columns[0]], title="Legend", fontsize=12, title_fontsize=14, loc='best', bbox_to_anchor=(1, 0.5))
+
+
+    # Save the chart as a .jpg file
     plt.tight_layout()
-
-    # save the chart as a .jpg file
-    file_path_jpg = 'pie_chart.jpg'
+    file_path_jpg = 'chart.jpg'
     plt.savefig(file_path_jpg, format='jpg')
-    file_size = os.path.getsize(file_path_jpg)
+    plt.close()  # Close the plot to free resources
 
-    # upload image file to slack
-    file_upload_url_response = app.client.files_getUploadURLExternal(filename=file_path_jpg,length=file_size)
+    # Slack upload logic remains unchanged
+    file_size = os.path.getsize(file_path_jpg)
+    file_upload_url_response = app.client.files_getUploadURLExternal(filename=file_path_jpg, length=file_size)
+    
     if DEBUG:
         print(file_upload_url_response)
     file_upload_url = file_upload_url_response['upload_url']
     file_id = file_upload_url_response['file_id']
+    
     with open(file_path_jpg, 'rb') as f:
         response = requests.post(file_upload_url, files={'file': f})
-
-    # check the response
+    
+    # Check the response
     img_url = None
     if response.status_code != 200:
         print("File upload failed", response.text)
     else:
-        # complete upload and get permalink to display
-        response = app.client.files_completeUploadExternal(files=[{"id":file_id, "title":"chart"}])
+        # Complete upload and get permalink to display
+        response = app.client.files_completeUploadExternal(files=[{"id": file_id, "title": "chart"}])
         if DEBUG:
             print(response)
         img_url = response['files'][0]['permalink']
@@ -294,12 +382,15 @@ def plot_chart(df):
     
     return img_url
 
+
+
 def init():
     conn,jwt = None,None
     conn = snowflake.connector.connect(
         user=USER,
         password=PASSWORD,
-        account=ACCOUNT
+        account=ACCOUNT,
+        warehouse=WAREHOUSE
     )
     
     jwt = generate_jwt.JWTGenerator(ACCOUNT,USER,RSA_PRIVATE_KEY_PATH).get_token()
@@ -313,3 +404,4 @@ if __name__ == "__main__":
         quit()
     Root = Root(CONN)
     SocketModeHandler(app, SLACK_APP_TOKEN).start()
+    
