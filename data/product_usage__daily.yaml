@@ -1083,54 +1083,50 @@ verified_queries:
     verified_at: 1736805794
     verified_by: Bella
     sql: "
-    WITH base AS (
-        SELECT
-            DATE_TRUNC('week', dt) AS time_period,
-            team_id,
-            team_name,
-            generalized_use_case,
-            lfg_flag,
-            listagg(distinct team_plan_tier, '-') as tiers,
-            SUM(total_fcu) AS total_fcu
-        FROM  __product_usage__daily
-        WHERE
-            team_plan_tier IN ('ENTERPRISE', 'SCALE', 'GROWTH')
-        GROUP BY 1, 2, 3, 4, 5
-    ), min_dt AS (
-        SELECT
-            team_id,
-            MIN(time_period) AS min_time_period
-        FROM base
-        GROUP BY 1
-    ), growth_accounting AS (
-        --- define each team_id as new, churned, expanded, contracted, retained
-    SELECT
-        time_period,
-        base.team_id,
-        team_name,
-        generalized_use_case,
-        lfg_flag,
-        tiers,
-        min_dt.min_time_period,
-        CASE
-            WHEN total_fcu = 0 THEN -total_fcu
-                    ELSE total_fcu
-        END AS total_fcu,
-        total_fcu - LAG(total_fcu) OVER (PARTITION BY base.team_id ORDER BY time_period) AS fcu_change,
-        CASE
-            WHEN time_period = min_time_period THEN 'new'
-            WHEN total_fcu = 0 THEN 'churned'
-            WHEN total_fcu > 0 AND total_fcu < LAG(total_fcu) OVER (PARTITION BY base.team_id ORDER BY time_period) THEN 'contracted'
-            WHEN total_fcu > 0 AND total_fcu > LAG(total_fcu) OVER (PARTITION BY base.team_id ORDER BY time_period) THEN 'expanded'
-            ELSE 'retained'
-        END AS growth_status
-    FROM base
-    INNER JOIN min_dt ON base.team_id = min_dt.team_id
-    )
-    SELECT time_period,
-      growth_status,
-      COUNT(DISTINCT team_id) AS teams,
-      SUM(total_fcu) AS total_cu
-    FROM growth_accounting
-    GROUP BY 1, 2
+      WITH base AS (
+          SELECT
+              DATE_TRUNC('week', dt) AS time_period,
+              team_id,
+              team_name,
+              generalized_use_case,
+              lfg_flag,
+              LISTAGG(DISTINCT team_plan_tier, '-') AS tiers,
+              SUM(total_fcu) AS total_fcu
+          FROM __product_usage__daily
+          WHERE team_plan_tier IN ('ENTERPRISE', 'SCALE', 'GROWTH')
+          GROUP BY 1, 2, 3, 4, 5
+      ), min_dt AS (
+          SELECT
+              team_id,
+              MIN(time_period) AS min_time_period
+          FROM base
+          GROUP BY 1
+      ), growth_accounting AS (
+          SELECT
+              time_period,
+              base.team_id,
+              team_name,
+              generalized_use_case,
+              lfg_flag,
+              tiers,
+              min_dt.min_time_period,
+              total_fcu,
+              total_fcu - LAG(total_fcu) OVER (PARTITION BY base.team_id ORDER BY time_period) AS fcu_change,
+              CASE
+                  WHEN time_period = min_time_period THEN 'new'
+                  WHEN total_fcu = 0 THEN 'churned'
+                  WHEN total_fcu > 0 AND total_fcu < LAG(total_fcu) OVER (PARTITION BY base.team_id ORDER BY time_period) THEN 'contracted'
+                  WHEN total_fcu > 0 AND total_fcu > LAG(total_fcu) OVER (PARTITION BY base.team_id ORDER BY time_period) THEN 'expanded'
+                  ELSE 'retained'
+              END AS growth_status
+          FROM base
+          INNER JOIN min_dt ON base.team_id = min_dt.team_id
+      )
+      SELECT
+          time_period,
+          growth_status,
+          COUNT(DISTINCT team_id) AS teams,
+          SUM(total_fcu) AS total_cu
+      FROM growth_accounting
+      GROUP BY 1, 2
     "

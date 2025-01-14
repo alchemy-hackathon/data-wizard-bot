@@ -304,33 +304,7 @@ def display_analyst_content(
                 thread_ts=thread_ts
             )               
 
-def query_llm_for_chart(df) -> Any:
-    # Convert DataFrame to a string representation for the API
-    # df_str = df.head().to_string()
-
-    # cortex_payload = {
-    #     "model": "llama3.1-8b",  # Replace with your actual model name
-    #     "messages": [
-    #         {"role": "system", "content": "You are a data visualization assistant."},
-    #         {"role": "user", "content": f"The following is a sample of a DataFrame:\n{df_str}\nBased on this data, determine the best chart type (line, bar, or pie, or none). Respond with one word specifying the type."}
-    #     ]
-    # }
-
-    # resp = requests.post(
-    #     url=f"{LLM_ENDPOINT}",
-    #     json=cortex_payload,
-    #     headers={
-    #         "X-Snowflake-Authorization-Token-Type": "KEYPAIR_JWT",
-    #         "Content-Type": "application/json",
-    #         "Accept": "application/json",
-    #         "Authorization": f"Bearer {JWT}",
-    #     },
-    # )
-    # if resp.status_code == 200:
-    #     return resp.text
-    # else:
-    #     raise ValueError(f"Cortex API call failed: {resp.status_code} {resp.text}")
-
+def query_llm_for_chart_code(df) -> Any:
     response = openai.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -340,86 +314,15 @@ def query_llm_for_chart(df) -> Any:
             }
         ]
     )
-
-    code = response.choices[0].message.content
-
-    return code
+    return response.choices[0].message.content
 
 def plot_chart(df):
     # Try to detect if the data represents a time series
     is_time_series = False
 
-    response = query_llm_for_chart(df)
-    cleaned_response = response.strip('```python').strip('```').strip()
-    exec(cleaned_response)
-    # print(response)
-    # chart_type = None
-    # if "bar" in response.lower():
-    #     chart_type = "bar"
-    # elif "pie" in response.lower():
-    #     chart_type = "pie"
-    # elif "line" in response.lower():
-    #     chart_type = "line"
-    # else:
-    #     raise ValueError("Unsupported chart type")
-
-    # # Check if the index is datetime-like
-    # if pd.api.types.is_datetime64_any_dtype(df.index):
-    #     is_time_series = True
-    # else:
-    #     # Attempt to convert the first column to datetime
-    #     try:
-    #         df[df.columns[0]] = pd.to_datetime(df[df.columns[0]])
-    #         df.set_index(df.columns[0], inplace=True)
-    #         is_time_series = True
-    #     except (ValueError, TypeError):
-    #         pass
-
-    # # Determine the chart type
-    # if is_time_series:
-    #     chart_type = 'line'
-    # elif len(df.columns) == 2 and pd.api.types.is_numeric_dtype(df[df.columns[1]]):
-    #     chart_type = 'pie'
-    # else:
-    #     raise ValueError("Unsupported DataFrame structure for plotting.")
-
-    # plt.figure(figsize=(10, 6), facecolor='#333333')
-
-    # if chart_type == 'line':
-    #     # Line chart
-    #     for col in df.columns:
-    #         plt.plot(df.index, df[col], label=col)
-    #     plt.xlabel("Time", fontsize=14, color="white")
-    #     plt.ylabel("Values", fontsize=14, color="white")
-    #     plt.title("Time Series Line Chart", fontsize=16, color="white")
-    #     plt.legend(fontsize=12, loc='best')  # Add a legend for line chart
-    #     plt.gca().set_facecolor('#333333')
-    #     plt.grid(color='gray', linestyle='--', linewidth=0.5)
-
-    # elif chart_type == 'bar':
-    #     # Bar chart
-    #     plt.bar(df.index, df[df.columns[0]], color=plt.cm.tab20.colors[0])
-    #     plt.xlabel(df.index.name or "Categories", fontsize=14, color="white")
-    #     plt.ylabel("Values", fontsize=14, color="white")
-    #     plt.title("Bar Chart", fontsize=16, color="white")
-    #     plt.xticks(rotation=45)
-    #     plt.gca().set_facecolor('#333333')
-    #     plt.grid(color='gray', linestyle='--', linewidth=0.5, axis='y')
-
-    # elif chart_type == 'pie':
-    #     # Pie chart
-    #     wedges, texts, autotexts = plt.pie(df[df.columns[1]], 
-    #                                     # labels=df[df.columns[0]], 
-    #                                     autopct='%1.1f%%', 
-    #                                     startangle=90, 
-    #                                     colors=plt.cm.tab20.colors[:len(df)], 
-    #                                     textprops={'color': "white", 'fontsize': 16})
-    #     plt.axis('equal')  # Equal aspect ratio for pie chart
-    #     plt.gca().set_facecolor('#333333')
-
-    #     # Add a legend for the pie chart
-    #     plt.legend(wedges, df[df.columns[0]], title="Legend", fontsize=12, title_fontsize=14, loc='best', bbox_to_anchor=(1, 0.5))
-
+    code = query_llm_for_chart_code(df)
+    cleaned_code = response.strip('```python').strip('```').strip()
+    exec(cleaned_code)
 
     # Save the chart as a .jpg file
     plt.tight_layout()
