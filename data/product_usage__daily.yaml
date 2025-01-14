@@ -1031,7 +1031,7 @@ verified_queries:
       GROUP BY
         1
     "
-    - name: "Teams and CU by Product Vertical and Product Category"
+  - name: "Teams and CU by Product Vertical and Product Category"
     question: "Can you show me # of paid teams and paid cu for Node Service, by product category?"
     verified_at: 1736805794
     verified_by: Bella
@@ -1047,7 +1047,7 @@ verified_queries:
       GROUP BY
         1, 2
     "
-    - name: "Teams and CU by Blockchain"
+  - name: "Teams and CU by Blockchain"
     question: "Can you show me # of paid teams and paid cu by blockchain and network?"
     verified_at: 1736805794
     verified_by: Bella
@@ -1063,7 +1063,7 @@ verified_queries:
       GROUP BY
         1, 2
     "
-    - name: "LFG Teams"
+  - name: "LFG Teams"
     question: "Can you show me weekly # of active lfg teams for past 1 year?"
     verified_at: 1736805794
     verified_by: Bella
@@ -1078,7 +1078,7 @@ verified_queries:
       GROUP BY
         1
     "
-    - name: "Paid Teams Growth Accounting"
+  - name: "Paid Teams Growth Accounting"
     question: "Can you show me # of paid teams and paid cu from teams that are churned/resurrected/new/expanded/contracted?"
     verified_at: 1736805794
     verified_by: Bella
